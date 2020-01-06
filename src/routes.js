@@ -6,12 +6,14 @@ const routes = [
   {
     path: '/login',
     name: 'login',
-    component: login
+    component: login,
+    props: true
   },
   {
     path: '/calendar',
     name: 'calendar',
-    component: calendar
+    component: calendar,
+    props: true
   }
 ];
 

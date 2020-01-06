@@ -12,7 +12,7 @@ Vue.use(VueResource);
 
 Vue.http.options.xhr = { withCredentials : true };
 
-const router = new VueRouter({routes});
+const router = new VueRouter({routes, mode: 'history'});
 
 new Vue({
   render: h => h(App),

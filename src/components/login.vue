@@ -8,26 +8,17 @@
               <v-toolbar color="primary" dark flat>
                 <v-toolbar-title>Login</v-toolbar-title>
                 <v-spacer></v-spacer>
-
-
               </v-toolbar>
               <v-card-text>
-
-
-
-                <h1>{{daten}}</h1>
-
-
-
                 <v-form>
-                  <v-text-field label="Login" name="login" prepend-icon="person" type="text"></v-text-field>
-
-                  <v-text-field id="password" label="Password" name="password" prepend-icon="lock" type="password"></v-text-field>
+                  <v-text-field readonly v-if="error" label="Regular" color=red value="errortext"></v-text-field>
+                  <v-text-field label="Login" name="login" prepend-icon="person" v-model="loginuser.name" type="text"></v-text-field>
+                  <v-text-field id="password" label="Password" name="password" prepend-icon="lock" type="password" v-model="loginuser.password"></v-text-field>
                 </v-form>
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="primary" @click="loadthedata()">Login</v-btn>
+                <v-btn color="primary" @click="login()">Login</v-btn>
               </v-card-actions>
             </v-card>
           </v-col>
@@ -39,22 +30,38 @@
 
 <script>
   export default {
-    props: {
-      source: String,
-    },
     data: () => ({
       drawer: null,
-      daten: {}
+      daten: [],
+      benutzer: {},
+      loginuser: {},
+      error: false,
+      errortext: "Username or Password wrong!"
     }),
-    methods: {
-      loadthedata() {
-        var self = this
-        this.$http.get('http://localhost:8081/').then((response) => {
+    // mounted() {
+    //   var self = this;
+    //   this.$http.get('http://localhost:8081/persons').then((response) => {
+    //     if (response['status'] == 200) {
+    //       self.daten = response.data[0]
+    //     }
+    //   })
+    // },
+    methods:{
+      login(){
+        // this.$router.push('/calendar')
+        var self = this;
+        console.log(this.loginuser)
+        this.$http.post('https://localhost:8443/persons/login', self.loginuser).then((response) => {
           if (response['status'] == 200) {
-            self.daten = response.data
+            self.benutzer = response.data[0]
+            var ubergeben = self.benutzer
+            self.$router.push({path: '/calendar', params: {ubergeben}})
           }
-        })
+          else{
+            self.error = true;
+          }
 
+        })
       }
     }
   }
