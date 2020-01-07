@@ -14,6 +14,60 @@
           </v-btn>
           <v-toolbar-title>{{ title }}</v-toolbar-title>
           <v-spacer></v-spacer>
+
+          <v-dialog v-model="dialog" width="500">
+            <template v-slot:activator="{ on }">
+              <v-btn outlined v-on="on">
+                add event
+              </v-btn>
+            </template>
+            <v-card>
+              <v-card-title class="headline grey lighten-2" primary-title>
+                add event
+              </v-card-title>
+
+
+              <v-card-text>
+                <!-- Name and details -->
+                <v-text-field label="name" v-model="saveevent.name"></v-text-field>
+                <v-text-field label="details" v-model="saveevent.details"></v-text-field>
+                <!-- Name and details -->
+
+                <!-- DATE -->
+                <v-menu v-model="startdate" :close-on-content-click="false" :nudge-right="40" transition="scale-transition" offset-y min-width="290px">
+                  <template v-slot:activator="{ on }">
+                    <v-text-field v-model="saveevent.start" label="Startdate" prepend-icon="event" readonly v-on="on"></v-text-field>
+                  </template>
+                  <v-date-picker v-model="saveevent.start" @input="menu2 = false"></v-date-picker>
+                </v-menu>
+                <v-menu v-model="enddate" :close-on-content-click="false" :nudge-right="40" transition="scale-transition" offset-y min-width="290px">
+                  <template v-slot:activator="{ on }">
+                    <v-text-field v-model="saveevent.end" label="Enddate" prepend-icon="event" readonly v-on="on"></v-text-field>
+                  </template>
+                  <v-date-picker v-model="saveevent.end" @input="menu2 = false"></v-date-picker>
+                </v-menu>
+                <!-- DATE -->
+
+                <!-- COLOR -->
+                <v-overflow-btn class="my-2" :items="dropdown_font" label="Color" target="#dropdown-example" v-model="saveevent.color"></v-overflow-btn>
+                <!-- COLOR -->
+              </v-card-text>
+
+              <v-divider></v-divider>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn color="primary" flat @click="eventissaved()">
+                  save
+                </v-btn>
+                <v-btn color="primary" flat @click="dialog = false">
+                  cancel
+                </v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-dialog>
+
+
+          <v-spacer></v-spacer>
           <v-menu bottom right>
             <template v-slot:activator="{ on }">
               <v-btn outlined v-on="on">
@@ -76,6 +130,13 @@
   export default {
     props: ['ubergeben'],
     data: () => ({
+      saveevent: {},
+      dropdown_font: ['green', 'blue', 'red', 'purple', 'orange'],
+      startdate: false,
+      enddate: false,
+      datepickerend: new Date().toISOString().substr(0, 10),
+      datepickerstart: new Date().toISOString().substr(0, 10),
+      dialog: false,
       benutzer: {},
       today: '2019-01-01',
       focus: '2019-01-01',
@@ -94,127 +155,127 @@
       events: [{
           name: 'Vacation',
           details: 'Going to the beach!',
-          start: '2018-12-29',
-          end: '2019-01-01',
-          color: 'blue',
+          start: '2020-1-02 1:44:44',
+          end: '2020-01-06 1:11',
+          color: 'orange',
         },
-        {
-          name: 'Meeting',
-          details: 'Spending time on how we do not have enough time',
-          start: '2019-01-07 09:00',
-          end: '2019-01-07 09:30',
-          color: 'indigo',
-        },
-        {
-          name: 'Large Event',
-          details: 'This starts in the middle of an event and spans over multiple events',
-          start: '2018-12-31',
-          end: '2019-01-04',
-          color: 'deep-purple',
-        },
-        {
-          name: '3rd to 7th',
-          details: 'Testing',
-          start: '2019-01-03',
-          end: '2019-01-07',
-          color: 'cyan',
-        },
-        {
-          name: 'Big Meeting',
-          details: 'A very important meeting about nothing',
-          start: '2019-01-07 08:00',
-          end: '2019-01-07 11:30',
-          color: 'red',
-        },
-        {
-          name: 'Another Meeting',
-          details: 'Another important meeting about nothing',
-          start: '2019-01-07 10:00',
-          end: '2019-01-07 13:30',
-          color: 'brown',
-        },
-        {
-          name: '7th to 8th',
-          start: '2019-01-07',
-          end: '2019-01-08',
-          color: 'blue',
-        },
-        {
-          name: 'Lunch',
-          details: 'Time to feed',
-          start: '2019-01-07 12:00',
-          end: '2019-01-07 15:00',
-          color: 'deep-orange',
-        },
-        {
-          name: '30th Birthday',
-          details: 'Celebrate responsibly',
-          start: '2019-01-03',
-          color: 'teal',
-        },
-        {
-          name: 'New Year',
-          details: 'Eat chocolate until you pass out',
-          start: '2019-01-01',
-          end: '2019-01-02',
-          color: 'green',
-        },
-        {
-          name: 'Conference',
-          details: 'The best time of my life',
-          start: '2019-01-21',
-          end: '2019-01-28',
-          color: 'grey darken-1',
-        },
-        {
-          name: 'Hackathon',
-          details: 'Code like there is no tommorrow',
-          start: '2019-01-30 23:00',
-          end: '2019-02-01 08:00',
-          color: 'black',
-        },
-        {
-          name: 'event 1',
-          start: '2019-01-14 18:00',
-          end: '2019-01-14 19:00',
-          color: '#4285F4',
-        },
-        {
-          name: 'event 2',
-          start: '2019-01-14 18:00',
-          end: '2019-01-14 19:00',
-          color: '#4285F4',
-        },
-        {
-          name: 'event 5',
-          start: '2019-01-14 18:00',
-          end: '2019-01-14 19:00',
-          color: '#4285F4',
-        },
-        {
-          name: 'event 3',
-          start: '2019-01-14 18:30',
-          end: '2019-01-14 20:30',
-          color: '#4285F4',
-        },
-        {
-          name: 'event 4',
-          start: '2019-01-14 19:00',
-          end: '2019-01-14 20:00',
-          color: '#4285F4',
-        },
-        {
-          name: 'event 6',
-          start: '2019-01-14 21:00',
-          end: '2019-01-14 23:00',
-          color: '#4285F4',
-        },
-        {
-          name: 'event 7',
-          start: '2019-01-14 22:00',
-          end: '2019-01-14 23:00',
-          color: '#4285F4',
-        },
+        /*  {
+            name: 'Meeting',
+            details: 'Spending time on how we do not have enough time',
+            start: '2019-01-07 09:00',
+            end: '2019-01-07 09:30',
+            color: 'indigo',
+          },
+          {
+            name: 'Large Event',
+            details: 'This starts in the middle of an event and spans over multiple events',
+            start: '2018-12-31',
+            end: '2019-01-04',
+            color: 'deep-purple',
+          },
+          {
+            name: '3rd to 7th',
+            details: 'Testing',
+            start: '2019-01-03',
+            end: '2019-01-07',
+            color: 'cyan',
+          },
+          {
+            name: 'Big Meeting',
+            details: 'A very important meeting about nothing',
+            start: '2019-01-07 08:00',
+            end: '2019-01-07 11:30',
+            color: 'red',
+          },
+          {
+            name: 'Another Meeting',
+            details: 'Another important meeting about nothing',
+            start: '2019-01-07 10:00',
+            end: '2019-01-07 13:30',
+            color: 'brown',
+          },
+          {
+            name: '7th to 8th',
+            start: '2019-01-07',
+            end: '2019-01-08',
+            color: 'blue',
+          },
+          {
+            name: 'Lunch',
+            details: 'Time to feed',
+            start: '2019-01-07 12:00',
+            end: '2019-01-07 15:00',
+            color: 'deep-orange',
+          },
+          {
+            name: '30th Birthday',
+            details: 'Celebrate responsibly',
+            start: '2019-01-03',
+            color: 'teal',
+          },
+          {
+            name: 'New Year',
+            details: 'Eat chocolate until you pass out',
+            start: '2019-01-01',
+            end: '2019-01-02',
+            color: 'green',
+          },
+          {
+            name: 'Conference',
+            details: 'The best time of my life',
+            start: '2019-01-21',
+            end: '2019-01-28',
+            color: 'grey darken-1',
+          },
+          {
+            name: 'Hackathon',
+            details: 'Code like there is no tommorrow',
+            start: '2019-01-30 23:00',
+            end: '2019-02-01 08:00',
+            color: 'black',
+          },
+          {
+            name: 'event 1',
+            start: '2019-01-14 18:00',
+            end: '2019-01-14 19:00',
+            color: '#4285F4',
+          },
+          {
+            name: 'event 2',
+            start: '2019-01-14 18:00',
+            end: '2019-01-14 19:00',
+            color: '#4285F4',
+          },
+          {
+            name: 'event 5',
+            start: '2019-01-14 18:00',
+            end: '2019-01-14 19:00',
+            color: '#4285F4',
+          },
+          {
+            name: 'event 3',
+            start: '2019-01-14 18:30',
+            end: '2019-01-14 20:30',
+            color: '#4285F4',
+          },
+          {
+            name: 'event 4',
+            start: '2019-01-14 19:00',
+            end: '2019-01-14 20:00',
+            color: '#4285F4',
+          },
+          {
+            name: 'event 6',
+            start: '2019-01-14 21:00',
+            end: '2019-01-14 23:00',
+            color: '#4285F4',
+          },
+          {
+            name: 'event 7',
+            start: '2019-01-14 22:00',
+            end: '2019-01-14 23:00',
+            color: '#4285F4',
+          },*/
       ],
     }),
     computed: {
@@ -257,10 +318,22 @@
       },
     },
     mounted() {
+      this.today = new Date()
+      this.focus = new Date()
+      // console.log(new Date())
       this.$refs.calendar.checkChange()
       this.benutzer = this.ubergeben;
     },
     methods: {
+      eventissaved(){
+        console.log(this.saveevent)
+        // var self = this;
+        // this.$http.post('https://localhost:8443/xplanners', self.saveevent).then((response) => {
+        //   if (response['status'] == 200) {
+        //     console.log("Funkt")
+        //   }
+        // })
+      },
       viewDay({
         date
       }) {

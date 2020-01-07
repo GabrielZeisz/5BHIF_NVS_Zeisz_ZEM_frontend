@@ -17,6 +17,7 @@
                 </v-form>
               </v-card-text>
               <v-card-actions>
+                <v-btn outlined @click="goback()">zurück</v-btn>
                 <v-spacer></v-spacer>
                 <v-btn color="primary" @click="login()">Login</v-btn>
               </v-card-actions>
@@ -48,20 +49,40 @@
     // },
     methods:{
       login(){
-        // this.$router.push('/calendar')
-        var self = this;
-        console.log(this.loginuser)
-        this.$http.post('https://localhost:8443/persons/login', self.loginuser).then((response) => {
-          if (response['status'] == 200) {
-            self.benutzer = response.data[0]
-            var ubergeben = self.benutzer
-            self.$router.push({path: '/calendar', params: {ubergeben}})
-          }
-          else{
-            self.error = true;
-          }
-
-        })
+        // // this.$router.push('/calendar')
+//var self = this;
+        // // console.log(this.loginuser)
+        // this.$http.post('https://localhost:8443/persons/login', self.loginuser).then((response) => {
+        //   if (response['status'] == 200) {
+        //     self.benutzer = response.data[0]
+        //     var ubergeben = self.benutzer
+        //     self.$router.push({path: '/calendar', params: {ubergeben}})
+        //   }
+        //   else{
+        //     self.error = true;
+        //   }
+        //
+        // })
+        let router = this.$router
+       //console.log(self)
+       let xhr = new XMLHttpRequest()
+       xhr.onreadystatechange = function(){
+           if(xhr.readyState == 4) {
+             if(xhr.status == 200){
+               //let user = JSON.parse(xhr.responseText)
+               router.push('/calendar')
+             }
+             else {
+               console.log("error " + xhr.status)
+           }
+         }
+       }
+       xhr.open("POST", "https://localhost:8443/persons/login", true)
+       xhr.setRequestHeader("Content-Type", "Application/json")
+       xhr.send(JSON.stringify({"username":"user", "password":"user"}))
+      },
+      goback(){
+        window.history.go(-1)
       }
     }
   }
