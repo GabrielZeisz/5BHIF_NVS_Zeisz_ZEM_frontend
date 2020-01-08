@@ -12,8 +12,8 @@
               <v-card-text>
                 <v-form>
                   <v-text-field readonly v-if="error" label="Regular" color=red value="errortext"></v-text-field>
-                  <v-text-field label="Login" name="login" prepend-icon="person" v-model="loginuser.name" type="text"></v-text-field>
-                  <v-text-field id="password" label="Password" name="password" prepend-icon="lock" type="password" v-model="loginuser.password"></v-text-field>
+                  <v-text-field label="Login" name="login" prepend-icon="person" v-model="loginuser.username" type="text"></v-text-field>
+                  <v-text-field id="password" label="Passwort" name="password" prepend-icon="lock" type="password" v-model="loginuser.password"></v-text-field>
                 </v-form>
               </v-card-text>
               <v-card-actions>
@@ -66,20 +66,22 @@
         let router = this.$router
        //console.log(self)
        let xhr = new XMLHttpRequest()
+
        xhr.onreadystatechange = function(){
            if(xhr.readyState == 4) {
              if(xhr.status == 200){
-               //let user = JSON.parse(xhr.responseText)
-               router.push('/calendar')
+               let user = JSON.parse(xhr.responseText)
+               router.push({name: 'calendar', params: {loggeduser: user}})
              }
              else {
                console.log("error " + xhr.status)
            }
          }
        }
+
        xhr.open("POST", "https://localhost:8443/persons/login", true)
        xhr.setRequestHeader("Content-Type", "Application/json")
-       xhr.send(JSON.stringify({"username":"user", "password":"user"}))
+       xhr.send(JSON.stringify({"username":this.loginuser.username, "password":this.loginuser.password}))
       },
       goback(){
         window.history.go(-1)

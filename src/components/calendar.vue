@@ -18,49 +18,49 @@
           <v-dialog v-model="dialog" width="500">
             <template v-slot:activator="{ on }">
               <v-btn outlined v-on="on">
-                add event
+                + Termin
               </v-btn>
             </template>
             <v-card>
               <v-card-title class="headline grey lighten-2" primary-title>
-                add event
+                Erstellen eines Termins
               </v-card-title>
 
 
               <v-card-text>
                 <!-- Name and details -->
-                <v-text-field label="name" v-model="saveevent.name"></v-text-field>
-                <v-text-field label="details" v-model="saveevent.details"></v-text-field>
+                <v-text-field label="Name" v-model="saveevent.name"></v-text-field>
+                <v-text-field label="Beschreibung" v-model="saveevent.details"></v-text-field>
                 <!-- Name and details -->
 
                 <!-- DATE -->
                 <v-menu v-model="startdate" :close-on-content-click="false" :nudge-right="40" transition="scale-transition" offset-y min-width="290px">
                   <template v-slot:activator="{ on }">
-                    <v-text-field v-model="saveevent.start" label="Startdate" prepend-icon="event" readonly v-on="on"></v-text-field>
+                    <v-text-field v-model="saveevent.start" label="Startdatum" prepend-icon="event" readonly v-on="on"></v-text-field>
                   </template>
                   <v-date-picker v-model="saveevent.start" @input="menu2 = false"></v-date-picker>
                 </v-menu>
                 <v-menu v-model="enddate" :close-on-content-click="false" :nudge-right="40" transition="scale-transition" offset-y min-width="290px">
                   <template v-slot:activator="{ on }">
-                    <v-text-field v-model="saveevent.end" label="Enddate" prepend-icon="event" readonly v-on="on"></v-text-field>
+                    <v-text-field v-model="saveevent.end" label="Enddatum" prepend-icon="event" readonly v-on="on"></v-text-field>
                   </template>
                   <v-date-picker v-model="saveevent.end" @input="menu2 = false"></v-date-picker>
                 </v-menu>
                 <!-- DATE -->
 
                 <!-- COLOR -->
-                <v-overflow-btn class="my-2" :items="dropdown_font" label="Color" target="#dropdown-example" v-model="saveevent.color"></v-overflow-btn>
+                <v-overflow-btn class="my-2" :items="dropdown_font" label="Farbe" target="#dropdown-example" v-model="saveevent.color"></v-overflow-btn>
                 <!-- COLOR -->
               </v-card-text>
 
               <v-divider></v-divider>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="primary" flat @click="eventissaved()">
-                  save
-                </v-btn>
                 <v-btn color="primary" flat @click="dialog = false">
-                  cancel
+                  abbrechen
+                </v-btn>
+                <v-btn color="primary" flat @click="eventissaved()">
+                  speichern
                 </v-btn>
               </v-card-actions>
             </v-card>
@@ -77,44 +77,48 @@
             </template>
             <v-list>
               <v-list-item @click="type = 'day'">
-                <v-list-item-title>Day</v-list-item-title>
+                <v-list-item-title>Tag</v-list-item-title>
               </v-list-item>
               <v-list-item @click="type = 'week'">
-                <v-list-item-title>Week</v-list-item-title>
+                <v-list-item-title>Woche</v-list-item-title>
               </v-list-item>
               <v-list-item @click="type = 'month'">
-                <v-list-item-title>Month</v-list-item-title>
+                <v-list-item-title>Monat</v-list-item-title>
               </v-list-item>
               <v-list-item @click="type = '4day'">
-                <v-list-item-title>4 days</v-list-item-title>
+                <v-list-item-title>4 Tage</v-list-item-title>
               </v-list-item>
             </v-list>
           </v-menu>
         </v-toolbar>
       </v-sheet>
       <v-sheet height="600">
+
+
         <v-calendar ref="calendar" v-model="focus" color="primary" :events="events" :event-color="getEventColor" :event-margin-bottom="3" :now="today" :type="type" @click:event="showEvent" @click:more="viewDay" @click:date="viewDay"
           @change="updateRange"></v-calendar>
+
         <v-menu v-model="selectedOpen" :close-on-content-click="false" :activator="selectedElement" offset-x>
           <v-card color="grey lighten-4" min-width="350px" flat>
             <v-toolbar :color="selectedEvent.color" dark>
-              <v-btn icon>
+              <v-btn icon @click="toggleevent()">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
-              <v-toolbar-title v-html="selectedEvent.name"></v-toolbar-title>
+              <v-toolbar-title>
+                <h3 v-if="updateevent">{{selectedEvent.name}}</h3>
+                <v-text-field v-if="!updateevent" v-model="selectedEvent.name"></v-text-field>
+              </v-toolbar-title>
               <v-spacer></v-spacer>
-              <v-btn icon>
-                <v-icon>mdi-heart</v-icon>
-              </v-btn>
-              <v-btn icon>
-                <v-icon>mdi-dots-vertical</v-icon>
+              <v-btn icon @click="deleteevent()">
+                <v-icon>mdi-trash-can-outline</v-icon>
               </v-btn>
             </v-toolbar>
             <v-card-text>
-              <span v-html="selectedEvent.details"></span>
+              <span v-if="updateevent" v-html="selectedEvent.details"></span>
+              <v-textarea v-if="!updateevent" name="input-7-1" v-model="selectedEvent.details"></v-textarea>
             </v-card-text>
             <v-card-actions>
-              <v-btn text color="secondary" @click="selectedOpen = false">
+              <v-btn text color="secondary" @click="recoverstat()">
                 Cancel
               </v-btn>
             </v-card-actions>
@@ -128,8 +132,10 @@
 
 <script>
   export default {
-    props: ['ubergeben'],
+    props: ['loggeduser'],
     data: () => ({
+      recoverevent: {},
+      updateevent: true,
       saveevent: {},
       dropdown_font: ['green', 'blue', 'red', 'purple', 'orange'],
       startdate: false,
@@ -142,10 +148,10 @@
       focus: '2019-01-01',
       type: 'month',
       typeToLabel: {
-        month: 'Month',
-        week: 'Week',
-        day: 'Day',
-        '4day': '4 Days',
+        month: 'Monat',
+        week: 'Woche',
+        day: 'Tag',
+        '4day': '4 Tage',
       },
       start: null,
       end: null,
@@ -153,130 +159,12 @@
       selectedElement: null,
       selectedOpen: false,
       events: [{
-          name: 'Vacation',
-          details: 'Going to the beach!',
-          start: '2020-1-02 1:44:44',
-          end: '2020-01-06 1:11',
-          color: 'orange',
-        },
-        /*  {
-            name: 'Meeting',
-            details: 'Spending time on how we do not have enough time',
-            start: '2019-01-07 09:00',
-            end: '2019-01-07 09:30',
-            color: 'indigo',
-          },
-          {
-            name: 'Large Event',
-            details: 'This starts in the middle of an event and spans over multiple events',
-            start: '2018-12-31',
-            end: '2019-01-04',
-            color: 'deep-purple',
-          },
-          {
-            name: '3rd to 7th',
-            details: 'Testing',
-            start: '2019-01-03',
-            end: '2019-01-07',
-            color: 'cyan',
-          },
-          {
-            name: 'Big Meeting',
-            details: 'A very important meeting about nothing',
-            start: '2019-01-07 08:00',
-            end: '2019-01-07 11:30',
-            color: 'red',
-          },
-          {
-            name: 'Another Meeting',
-            details: 'Another important meeting about nothing',
-            start: '2019-01-07 10:00',
-            end: '2019-01-07 13:30',
-            color: 'brown',
-          },
-          {
-            name: '7th to 8th',
-            start: '2019-01-07',
-            end: '2019-01-08',
-            color: 'blue',
-          },
-          {
-            name: 'Lunch',
-            details: 'Time to feed',
-            start: '2019-01-07 12:00',
-            end: '2019-01-07 15:00',
-            color: 'deep-orange',
-          },
-          {
-            name: '30th Birthday',
-            details: 'Celebrate responsibly',
-            start: '2019-01-03',
-            color: 'teal',
-          },
-          {
-            name: 'New Year',
-            details: 'Eat chocolate until you pass out',
-            start: '2019-01-01',
-            end: '2019-01-02',
-            color: 'green',
-          },
-          {
-            name: 'Conference',
-            details: 'The best time of my life',
-            start: '2019-01-21',
-            end: '2019-01-28',
-            color: 'grey darken-1',
-          },
-          {
-            name: 'Hackathon',
-            details: 'Code like there is no tommorrow',
-            start: '2019-01-30 23:00',
-            end: '2019-02-01 08:00',
-            color: 'black',
-          },
-          {
-            name: 'event 1',
-            start: '2019-01-14 18:00',
-            end: '2019-01-14 19:00',
-            color: '#4285F4',
-          },
-          {
-            name: 'event 2',
-            start: '2019-01-14 18:00',
-            end: '2019-01-14 19:00',
-            color: '#4285F4',
-          },
-          {
-            name: 'event 5',
-            start: '2019-01-14 18:00',
-            end: '2019-01-14 19:00',
-            color: '#4285F4',
-          },
-          {
-            name: 'event 3',
-            start: '2019-01-14 18:30',
-            end: '2019-01-14 20:30',
-            color: '#4285F4',
-          },
-          {
-            name: 'event 4',
-            start: '2019-01-14 19:00',
-            end: '2019-01-14 20:00',
-            color: '#4285F4',
-          },
-          {
-            name: 'event 6',
-            start: '2019-01-14 21:00',
-            end: '2019-01-14 23:00',
-            color: '#4285F4',
-          },
-          {
-            name: 'event 7',
-            start: '2019-01-14 22:00',
-            end: '2019-01-14 23:00',
-            color: '#4285F4',
-          },*/
-      ],
+        name: 'default',
+        details: 'default',
+        start: '2020-01-08',
+        end: '2020-01-15',
+        color: 'blue'
+      }],
     }),
     computed: {
       title() {
@@ -320,19 +208,89 @@
     mounted() {
       this.today = new Date()
       this.focus = new Date()
-      // console.log(new Date())
       this.$refs.calendar.checkChange()
-      this.benutzer = this.ubergeben;
+      this.benutzer = this.loggeduser
+      this.events = this.loggeduser['planner']
     },
     methods: {
-      eventissaved(){
-        console.log(this.saveevent)
-        // var self = this;
-        // this.$http.post('https://localhost:8443/xplanners', self.saveevent).then((response) => {
-        //   if (response['status'] == 200) {
-        //     console.log("Funkt")
-        //   }
-        // })
+      deleteevent(){
+        let xhr = new XMLHttpRequest()
+        // let self = this
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
+              // let object = JSON.parse(xhr.responseText)
+              // console.log(object)
+              // self.benutzer['planner'].push(object)
+            } else {
+              console.log("error " + xhr.status)
+            }
+          }
+        }
+
+        xhr.open("DELETE", "https://localhost:8443/xplanners?identifer=" + this.selectedEvent['identifier'], true)
+        xhr.setRequestHeader("Content-Type", "Application/json")
+
+        this.events.splice(this.selectedEvent.indexOf(0),1)
+        this.selectedOpen = false
+      },
+      toggleevent(){
+
+        if(this.updateevent == true){
+          this.updateevent = false
+        }
+        else {
+          this.updateevent = true
+        }
+      },
+      recoverstat(){
+        this.selectedOpen = false
+        this.selectedEvent = this.recoverevent
+      },
+      eventissaved() {
+        let xhr = new XMLHttpRequest()
+        let self = this
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
+              let object = JSON.parse(xhr.responseText)
+              console.log(object)
+              self.benutzer['planner'].push(object)
+            } else {
+              console.log("error " + xhr.status)
+            }
+          }
+        }
+
+        xhr.open("POST", "https://localhost:8443/xplanners", true)
+        xhr.setRequestHeader("Content-Type", "Application/json")
+        xhr.send(JSON.stringify(this.saveevent))
+
+        //   this.benutzer['planner'].push(this.saveevent)
+
+        console.log(JSON.stringify(this.benutzer))
+
+        this.savetheuser()
+
+        this.selectedOpen = false
+      },
+      savetheuser() {
+        let xhr = new XMLHttpRequest()
+        // let self = this
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState == 4) {
+            if (xhr.status == 200) {
+              // let object = JSON.parse(xhr.responseText)
+              // console.log(object)
+              // self.benutzer['planner'].push(object)
+            } else {
+              console.log("error " + xhr.status)
+            }
+          }
+        }
+        xhr.open("POST", "https://localhost:8443/persons", true)
+        xhr.setRequestHeader("Content-Type", "Application/json")
+        xhr.send(JSON.stringify(this.benutzer))
       },
       viewDay({
         date

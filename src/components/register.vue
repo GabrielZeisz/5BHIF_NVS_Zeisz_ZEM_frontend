@@ -12,8 +12,8 @@
               <v-card-text>
                 <v-form>
                   <v-text-field readonly v-if="error" label="Regular" color=red value="errortext"></v-text-field>
-                  <v-text-field label="Name" name="register" prepend-icon="person" v-model="registeruser.name" type="text"></v-text-field>
-                  <v-text-field id="password" label="Password" name="password" prepend-icon="lock" type="password" v-model="registeruser.password"></v-text-field>
+                  <v-text-field label="Name" name="register" prepend-icon="person" v-model="registeruser.username" type="text"></v-text-field>
+                  <v-text-field id="password" label="Passwort" name="password" prepend-icon="lock" type="password" v-model="registeruser.password"></v-text-field>
                   <v-text-field id="address" label="Adresse" name="address" prepend-icon="house" type="text" v-model="registeruser.address"></v-text-field>
 
                   <v-menu v-model="menu" :close-on-content-click="false" transition="scale-transition" offset-y min-width="290px">
@@ -68,8 +68,8 @@
         this.$http.post('https://localhost:8443/persons/register', self.registeruser).then((response) => {
           if (response['status'] == 200) {
             self.benutzer = response.data[0]
-            var ubergeben = self.benutzer
-            self.$router.push({path: '/calendar', params: {ubergeben}})
+            // var ubergeben = self.benutzer
+            self.$router.push({name: 'login'})
           }
           else{
             self.error = true;
