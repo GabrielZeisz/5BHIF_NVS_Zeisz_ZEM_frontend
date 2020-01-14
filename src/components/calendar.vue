@@ -109,7 +109,7 @@
                 <v-text-field v-if="!updateevent" v-model="selectedEvent.name"></v-text-field>
               </v-toolbar-title>
               <v-spacer></v-spacer>
-              <v-btn icon @click="deleteevent()">
+              <v-btn icon @click="deleteevent(selectedEvent)">
                 <v-icon>mdi-trash-can-outline</v-icon>
               </v-btn>
             </v-toolbar>
@@ -131,9 +131,11 @@
 
 
 <script>
+  let eventlist = require('../assets/events.json')
   export default {
     props: ['loggeduser'],
     data: () => ({
+      listevent: eventlist,
       recoverevent: {},
       updateevent: true,
       saveevent: {},
@@ -213,7 +215,12 @@
       this.events = this.loggeduser['planner']
     },
     methods: {
-      deleteevent(){
+      deleteevent(selectedEvent) {
+        console.log(selectedEvent)
+        console.log(this.events)
+        this.events=[]
+        console.log(this.events)
+
         let xhr = new XMLHttpRequest()
         // let self = this
         xhr.onreadystatechange = function() {
@@ -231,19 +238,18 @@
         xhr.open("DELETE", "https://localhost:8443/xplanners?identifer=" + this.selectedEvent['identifier'], true)
         xhr.setRequestHeader("Content-Type", "Application/json")
 
-        this.events.splice(this.selectedEvent.indexOf(0),1)
+        //this.listevent.splice(selectedEvent)
         this.selectedOpen = false
       },
-      toggleevent(){
+      toggleevent() {
 
-        if(this.updateevent == true){
+        if (this.updateevent == true) {
           this.updateevent = false
-        }
-        else {
+        } else {
           this.updateevent = true
         }
       },
-      recoverstat(){
+      recoverstat() {
         this.selectedOpen = false
         this.selectedEvent = this.recoverevent
       },
@@ -269,10 +275,11 @@
         //   this.benutzer['planner'].push(this.saveevent)
 
         console.log(JSON.stringify(this.benutzer))
+        this.dialog = false
+        self.listevent.push(this.saveevent)
 
         this.savetheuser()
 
-        this.selectedOpen = false
       },
       savetheuser() {
         let xhr = new XMLHttpRequest()
@@ -288,6 +295,7 @@
             }
           }
         }
+        //        xhr.open("POST", "https://localhost:8443/persons?identifier=" + this.benutzer['identifier'], true)
         xhr.open("POST", "https://localhost:8443/persons", true)
         xhr.setRequestHeader("Content-Type", "Application/json")
         xhr.send(JSON.stringify(this.benutzer))
